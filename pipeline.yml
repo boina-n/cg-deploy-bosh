@@ -165,6 +165,7 @@ jobs:
     file: pipeline-tasks/update-runtime-config.yml
     input_mapping:
       manifests: bosh-config  
+      certificate: stagingbosh-certificate
     params:
       BOSH_CACERT: bosh.pem
       BOSH_ENV: {{stagingbosh-target}}
@@ -327,6 +328,7 @@ jobs:
     file: pipeline-tasks/update-runtime-config.yml
     input_mapping:
       manifests: bosh-config
+      certificate: stagingbosh-certificate
     params:
       BOSH_CACERT: bosh.pem
       BOSH_ENV: {{productionbosh-target}}
@@ -492,6 +494,7 @@ jobs:
     file: pipeline-tasks/update-runtime-config.yml
     input_mapping:
       manifests: bosh-config
+      certificate: stagingbosh-certificate
     params:
       BOSH_CACERT: bosh.pem
       BOSH_ENV: {{toolingbosh-target}}
