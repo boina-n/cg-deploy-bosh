@@ -728,9 +728,6 @@ resources:
   source:
     uri: {{bosh-config-git-url}}
     branch: {{bosh-config-git-branch}}
-    paths:
-    - bosh-deployment.yml
-    - cronjobs/*
 
 - name: bosh-init-config
   type: git
