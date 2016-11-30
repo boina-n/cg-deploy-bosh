@@ -167,7 +167,7 @@ jobs:
       manifests: bosh-config  
       certificate: stagingbosh-certificate
     params:
-      BOSH_CACERT: bosh.pem
+      BOSH_CACERT: certificate/bosh.pem
       BOSH_ENV: {{stagingbosh-target}}
       BOSH_USERNAME: {{stagingbosh-username}}
       BOSH_PASSWORD: {{stagingbosh-password}}
@@ -328,9 +328,9 @@ jobs:
     file: pipeline-tasks/update-runtime-config.yml
     input_mapping:
       manifests: bosh-config
-      certificate: stagingbosh-certificate
+      certificate: productionbosh-certificate
     params:
-      BOSH_CACERT: bosh.pem
+      BOSH_CACERT: certificate/bosh.pem
       BOSH_ENV: {{productionbosh-target}}
       BOSH_USERNAME: {{productionbosh-username}}
       BOSH_PASSWORD: {{productionbosh-password}}
@@ -494,9 +494,9 @@ jobs:
     file: pipeline-tasks/update-runtime-config.yml
     input_mapping:
       manifests: bosh-config
-      certificate: stagingbosh-certificate
+      certificate: toolingbosh-certificate
     params:
-      BOSH_CACERT: bosh.pem
+      BOSH_CACERT: certificate/bosh.pem
       BOSH_ENV: {{toolingbosh-target}}
       BOSH_USERNAME: {{toolingbosh-username}}
       BOSH_PASSWORD: {{toolingbosh-password}}
