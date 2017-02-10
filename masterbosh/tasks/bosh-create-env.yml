@@ -1,0 +1,19 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: 18fgsa/concourse-task
+
+inputs:
+- name: deploy-bosh
+- name: secrets
+- name: bosh-state
+- name: terraform-state
+- name: stemcell
+- name: bosh-release
+- name: bosh-aws-cpi-release
+
+run:
+  path: deploy-bosh/masterbosh/tasks/bosh-create-env.sh

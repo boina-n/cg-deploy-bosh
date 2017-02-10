@@ -1,0 +1,167 @@
+---
+name: master-bosh
+
+cloud_provider:
+  template: {name: aws_cpi, release: bosh-aws-cpi}
+  ssh_tunnel:
+    host: (( grab jobs.bosh.networks.private.static_ips ))
+    port: 22
+    user: vcap
+    private_key: ./ssh.key
+  mbus: (( grab properties.agent.mbus ))
+
+  properties:
+    aws:
+      credentials_source: env_or_profile
+    blobstore:
+      provider: local
+      path: /var/vcap/micro_bosh/data/cache}
+    agent: (( grab properties.agent ))
+    ntp: (( grab properties.ntp ))
+
+releases:
+- name: bosh
+  url: (( grab $RELEASES_BOSH_URL ))
+  sha1: (( grab $RELEASES_BOSH_SHA1 ))
+- name: bosh-aws-cpi
+  url: (( grab $RELEASES_BOSH_AWS_CPI_URL ))
+  sha1: (( grab $RELEASES_BOSH_AWS_CPI_SHA1 ))
+
+resource_pools:
+- name: bosh
+  network: private
+  stemcell:
+    url: (( grab $STEMCELL_URL ))
+    sha1: (( grab $STEMCELL_SHA1 ))
+  cloud_properties:
+    instance_type: m3.large
+    ephemeral_disk:
+      size: 25_000
+      type: gp2
+      encrypted: true
+    availability_zone: (( grab terraform_outputs.private_subnet_az1_zone ))
+
+disk_pools:
+- name: bosh
+  disk_size: 20_000
+  cloud_properties:
+    type: gp2
+    encrypted: true
+
+networks:
+- name: private
+  type: manual
+  subnets:
+  - range: (( grab terraform_outputs.private_subnet_az1_cidr ))
+    static:
+    - (( grab $STATIC_ADDRESS ))
+    gateway: (( grab terraform_outputs.private_subnet_az1_gateway ))
+    dns:
+      - (( grab $AMAZON_DNS ))
+    cloud_properties:
+      subnet: (( grab terraform_outputs.private_subnet_az1 ))
+
+jobs:
+- name: bosh
+  instances: 1
+  resource_pool: bosh
+  persistent_disk_pool: bosh
+
+  templates:
+  - {name: nats, release: bosh}
+  - {name: powerdns, release: bosh}
+  - {name: postgres, release: bosh}
+  - {name: blobstore, release: bosh}
+  - {name: director, release: bosh}
+  - {name: health_monitor, release: bosh}
+  - {name: registry, release: bosh}
+  - {name: aws_cpi, release: bosh-aws-cpi}
+
+  networks:
+  - name: private
+    static_ips: (( static_ips(0) ))
+    default: [dns, gateway]
+
+properties:
+  nats:
+    address: 127.0.0.1
+    user: nats
+    password: (( grab secrets.masterbosh.nats-password ))
+
+  postgres: &bosh_db
+    listen_address: 127.0.0.1
+    host: 127.0.0.1
+    user: postgres
+    password: (( grab secrets.masterbosh.postgres-password ))
+    database: bosh
+    adapter: postgres
+
+  dns:
+    address: (( grab jobs.bosh.networks.private.static_ips[0] ))
+    db: *bosh_db
+    recursor: (( grab $AMAZON_DNS ))
+    domain_name: masterbosh
+
+  registry:
+    address: (( grab jobs.bosh.networks.private.static_ips[0] ))
+    host: (( grab jobs.bosh.networks.private.static_ips[0] ))
+    db: *bosh_db
+    http:
+      user: admin
+      password: (( grab secrets.masterbosh.admin-password ))
+      port: 25777
+    username: admin
+    password:  (( grab secrets.masterbosh.admin-password ))
+    port: 25777
+    cloud:
+      plugin: aws
+      credentials_source: static
+      access_key_id: (( grab terraform_outputs.master_bosh_access_key_id ))
+      secret_access_key: (( grab terraform_outputs.master_bosh_secret_access_key ))
+      region: (( grab terraform_outputs.vpc_region ))
+
+  blobstore:
+    address: (( grab jobs.bosh.networks.private.static_ips[0] ))
+    port: 25250
+    provider: dav
+    director:
+      user: director
+      password: (( grab secrets.masterbosh.director-password ))
+    agent:
+      user: agent
+      password: (( grab secrets.masterbosh.agent-password ))
+
+  director:
+    address: 127.0.0.1
+    name: (( grab name ))
+    db: *bosh_db
+    cpi_job: aws_cpi
+    max_threads: 10
+    user_management:
+      provider: local
+      local:
+        users:
+        - name: admin
+          password: (( grab secrets.masterbosh.admin-password ))
+        - name: hm
+          password: (( grab secrets.masterbosh.hm-password ))
+    ssl: (( grab secrets.masterbosh.director.ssl ))
+
+  hm:
+    director_account:
+      user: hm
+      password: (( grab secrets.masterbosh.hm-password ))
+    resurrector_enabled: true
+
+  aws:
+    credentials_source: env_or_profile
+    default_key_name: (( grab secrets.masterbosh.ssh.keypair_name ))
+    default_security_groups:
+    - (( grab terraform_outputs.bosh_security_group ))
+
+  agent:
+    mbus: (( concat "https://mbus:" secrets.masterbosh.mbus-password "@" jobs.bosh.networks.private.static_ips[0] ":6868" ))
+
+  ntp:
+    - time.nist.gov
+
