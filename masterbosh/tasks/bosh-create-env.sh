@@ -55,7 +55,7 @@ spruce merge --prune secrets --prune terraform_outputs deploy-bosh/masterbosh/ma
 
 # extract the ssh key from our secrets because bosh create-env wants it on the file system :/
 # TODO: is there a better way to do this than converting to json + jq?
-spruce json secrets.yml | jq -r .secrets.masterbosh.ssh.private_key > ssh.key
+spruce json secrets-decrypted/*.yml | jq -r .secrets.masterbosh.ssh.private_key > ssh.key
 
 # and deploy it!
 set -x
