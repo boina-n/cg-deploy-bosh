@@ -4,7 +4,7 @@ name: master-bosh
 cloud_provider:
   template: {name: aws_cpi, release: bosh-aws-cpi}
   ssh_tunnel:
-    host: (( grab jobs.bosh.networks.private.static_ips ))
+    host: (( grab jobs.bosh.networks.private.static_ips[0] ))
     port: 22
     user: vcap
     private_key: ./ssh.key

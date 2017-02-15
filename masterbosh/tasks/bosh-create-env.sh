@@ -59,5 +59,5 @@ spruce json secrets-decrypted/*.yml | jq -r .secrets.masterbosh.ssh.private_key 
 
 # and deploy it!
 set -x
-bosh-cli create-env --state=state/*.json deployment-manifest.yml
+bosh-cli create-env --state bosh-state/*.json deployment-manifest.yml
 
