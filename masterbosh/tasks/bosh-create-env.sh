@@ -58,6 +58,6 @@ spruce merge --prune secrets --prune terraform_outputs deploy-bosh/masterbosh/ma
 spruce json secrets.yml | jq -r .secrets.masterbosh.ssh.private_key > ssh.key
 
 # and deploy it!
-# set -x
-#bosh-cli create-env --state=state/*.json deployment-manifest.yml
+set -x
+bosh-cli create-env --state=state/*.json deployment-manifest.yml
 
