@@ -1,0 +1,51 @@
+---
+azs:
+- name: z1
+  cloud_properties:
+    availability_zone: (( grab $AZ1 ))
+- name: z2
+  cloud_properties:
+    availability_zone: (( grab $AZ2 ))
+
+vm_types:
+- name: compilation
+  cloud_properties:
+    instance_type: m3.xlarge
+    ephemeral_disk:
+      size: 3000
+      type: gp2
+
+networks:
+- name: cf
+  type: manual
+  subnets:
+  - az: z1
+    cloud_properties:
+      subnet: (( grab terraform_outputs.private_subnet_az1 ))
+      security_groups:
+      - (( grab terraform_outputs.bosh_security_group ))
+  - az: z2
+    cloud_properties:
+      subnet: (( grab terraform_outputs.private_subnet_az2 ))
+      security_groups:
+      - (( grab terraform_outputs.bosh_security_group ))
+- name: services
+  type: manual
+  subnets:
+  - az: z1
+    cloud_properties:
+      subnet: (( grab terraform_outputs.services_subnet_az1 ))
+      security_groups:
+      - (( grab terraform_outputs.bosh_security_group ))
+  - az: z2
+    cloud_properties:
+      subnet: (( grab terraform_outputs.services_subnet_az1 ))
+      security_groups:
+      - (( grab terraform_outputs.bosh_security_group ))
+
+compilation:
+  workers: 5
+  reuse_compilation_vms: true
+  vm_type: compilation
+  network: private
+  az: z1

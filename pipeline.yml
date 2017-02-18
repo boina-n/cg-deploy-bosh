@@ -99,6 +99,9 @@ jobs:
       trigger: true
     - get: cron-release
       trigger: true
+    - get: terraform-state
+      resource: state-file-staging
+      trigger: true
     - get: stagingbosh-deployment
       passed: [deploy-staging-bosh]
   - aggregate:
@@ -161,6 +164,12 @@ jobs:
       input_mapping:
         release: cron-release
       params: *bosh-params-staging
+  - task: terraform-state-to-yaml
+    file: pipeline-tasks/terraform-state-to-yaml.yml
+    params:
+      STATE_FILE: terraform.tfstate
+  - task: update-cloud-config
+    file: bosh-config/update-cloud-config.yml
   - task: update-runtime-config
     file: bosh-config/update-runtime-config.yml
     params:
@@ -259,6 +268,9 @@ jobs:
       trigger: true
     - get: cron-release
       trigger: true
+    - get: terraform-state
+      resource: state-file-production
+      trigger: true
     - get: productionbosh-deployment
       passed: [deploy-production-bosh]
   - aggregate:
@@ -321,6 +333,12 @@ jobs:
       input_mapping:
         release: cron-release
       params: *bosh-params-prod
+  - task: terraform-state-to-yaml
+    file: pipeline-tasks/terraform-state-to-yaml.yml
+    params:
+      STATE_FILE: terraform.tfstate
+  - task: update-cloud-config
+    file: bosh-config/update-cloud-config.yml
   - task: update-runtime-config
     file: bosh-config/update-runtime-config.yml
     params:
@@ -733,6 +751,20 @@ resources:
     secrets_file: master-bosh.yml
     secrets_passphrase: {{masterbosh-secrets-passphrase}}
     bosh_cert: master-bosh.pem
+
+- name: state-file-staging
+  type: s3-iam
+  source:
+    bucket: {{tf-state-bucket-staging}}
+    versioned_file: {{tf-state-file-staging}}
+    region_name: {{aws-region}}
+
+- name: state-file-production
+  type: s3-iam
+  source:
+    bucket: {{tf-state-bucket-production}}
+    versioned_file: {{tf-state-file-production}}
+    region_name: {{aws-region}}
 
 - name: bosh-release
   type: bosh-io-release
