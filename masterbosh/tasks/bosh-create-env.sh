@@ -29,7 +29,10 @@ export RELEASES_BOSH_AWS_CPI_URL=$(cat bosh-aws-cpi-release/url  | tr -d '\n')
 export RELEASES_BOSH_AWS_CPI_SHA1=$(cat bosh-aws-cpi-release/sha1  | tr -d '\n')
 
 export STEMCELL_URL=$(cat stemcell/url  | tr -d '\n')
-export STEMCELL_SHA1=$(cat stemcell/sha1  | tr -d '\n')
+
+# pointless, but the manifest requires it, and until we integrate stemcell building into this pipeline
+# we have to trust what's in our bucket :/
+export STEMCELL_SHA1=$(shasum stemcell/*.tgz | cut -d" " -f1)
 
 # TODO: replace with cidrhost output
 # get our subnet address space
