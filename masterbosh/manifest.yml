@@ -11,15 +11,10 @@ cloud_provider:
   mbus: (( grab jobs.bosh.properties.agent.mbus ))
 
   properties:
-    aws:
-      region: (( grab terraform_outputs.vpc_region ))
-      credentials_source: env_or_profile
-      default_key_name: (( grab secrets.masterbosh.ssh.keypair_name ))
-      default_security_groups:
-      - (( grab terraform_outputs.bosh_security_group ))
+    aws: (( grab jobs.bosh.properties.aws ))
     blobstore:
       provider: local
-      path: /var/vcap/micro_bosh/data/cache}
+      path: /var/vcap/micro_bosh/data/cache
     agent: (( grab jobs.bosh.properties.agent ))
     ntp: (( grab jobs.bosh.properties.ntp ))
 
@@ -87,6 +82,13 @@ jobs:
     default: [dns, gateway]
 
   properties:
+    aws:
+      region: (( grab terraform_outputs.vpc_region ))
+      credentials_source: env_or_profile
+      default_key_name: (( grab secrets.masterbosh.ssh.keypair_name ))
+      default_security_groups:
+      - (( grab terraform_outputs.bosh_security_group ))
+
     nats:
       address: 127.0.0.1
       user: nats
@@ -162,3 +164,11 @@ jobs:
 
     ntp:
       - time.nist.gov
+    
+    aws:
+      region: (( grab terraform_outputs.vpc_region ))
+      credentials_source: env_or_profile
+      default_key_name: (( grab secrets.masterbosh.ssh.keypair_name ))
+      default_security_groups:
+      - (( grab terraform_outputs.bosh_security_group ))
+
