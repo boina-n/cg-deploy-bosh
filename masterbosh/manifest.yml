@@ -86,80 +86,79 @@ jobs:
     static_ips: (( static_ips(0) ))
     default: [dns, gateway]
 
-properties:
-  nats:
-    address: 127.0.0.1
-    user: nats
-    password: (( grab secrets.masterbosh.nats-password ))
+  properties:
+    nats:
+      address: 127.0.0.1
+      user: nats
+      password: (( grab secrets.masterbosh.nats-password ))
 
-  postgres: &bosh_db
-    listen_address: 127.0.0.1
-    host: 127.0.0.1
-    user: postgres
-    password: (( grab secrets.masterbosh.postgres-password ))
-    database: bosh
-    adapter: postgres
+    postgres: &bosh_db
+      listen_address: 127.0.0.1
+      host: 127.0.0.1
+      user: postgres
+      password: (( grab secrets.masterbosh.postgres-password ))
+      database: bosh
+      adapter: postgres
 
-  dns:
-    address: (( grab jobs.bosh.networks.private.static_ips[0] ))
-    db: *bosh_db
-    recursor: (( grab terraform_outputs.private_subnet_az1_dns ))
-    domain_name: masterbosh
+    dns:
+      address: (( grab jobs.bosh.networks.private.static_ips[0] ))
+      db: *bosh_db
+      recursor: (( grab terraform_outputs.private_subnet_az1_dns ))
+      domain_name: masterbosh
 
-  registry:
-    address: (( grab jobs.bosh.networks.private.static_ips[0] ))
-    host: (( grab jobs.bosh.networks.private.static_ips[0] ))
-    db: *bosh_db
-    http:
-      user: admin
-      password: (( grab secrets.masterbosh.admin-password ))
+    registry:
+      address: (( grab jobs.bosh.networks.private.static_ips[0] ))
+      host: (( grab jobs.bosh.networks.private.static_ips[0] ))
+      db: *bosh_db
+      http:
+        user: admin
+        password: (( grab secrets.masterbosh.admin-password ))
+        port: 25777
+      username: admin
+      password:  (( grab secrets.masterbosh.admin-password ))
       port: 25777
-    username: admin
-    password:  (( grab secrets.masterbosh.admin-password ))
-    port: 25777
-    cloud:
-      plugin: aws
-      credentials_source: static
-      access_key_id: (( grab terraform_outputs.master_bosh_access_key_id ))
-      secret_access_key: (( grab terraform_outputs.master_bosh_secret_access_key ))
-      region: (( grab terraform_outputs.vpc_region ))
+      cloud:
+        plugin: aws
+        credentials_source: static
+        access_key_id: (( grab terraform_outputs.master_bosh_access_key_id ))
+        secret_access_key: (( grab terraform_outputs.master_bosh_secret_access_key ))
+        region: (( grab terraform_outputs.vpc_region ))
 
-  blobstore:
-    address: (( grab jobs.bosh.networks.private.static_ips[0] ))
-    port: 25250
-    provider: dav
+    blobstore:
+      address: (( grab jobs.bosh.networks.private.static_ips[0] ))
+      port: 25250
+      provider: dav
+      director:
+        user: director
+        password: (( grab secrets.masterbosh.director-password ))
+      agent:
+        user: agent
+        password: (( grab secrets.masterbosh.agent-password ))
+
     director:
-      user: director
-      password: (( grab secrets.masterbosh.director-password ))
+      address: 127.0.0.1
+      name: (( grab name ))
+      db: *bosh_db
+      cpi_job: aws_cpi
+      max_threads: 10
+      user_management:
+        provider: local
+        local:
+          users:
+          - name: admin
+            password: (( grab secrets.masterbosh.admin-password ))
+          - name: hm
+            password: (( grab secrets.masterbosh.hm-password ))
+      ssl: (( grab secrets.masterbosh.director.ssl ))
+
+    hm:
+      director_account:
+        user: hm
+        password: (( grab secrets.masterbosh.hm-password ))
+      resurrector_enabled: true
+
     agent:
-      user: agent
-      password: (( grab secrets.masterbosh.agent-password ))
+      mbus: (( concat "https://mbus:" secrets.masterbosh.mbus-password "@" jobs.bosh.networks.private.static_ips[0] ":6868" ))
 
-  director:
-    address: 127.0.0.1
-    name: (( grab name ))
-    db: *bosh_db
-    cpi_job: aws_cpi
-    max_threads: 10
-    user_management:
-      provider: local
-      local:
-        users:
-        - name: admin
-          password: (( grab secrets.masterbosh.admin-password ))
-        - name: hm
-          password: (( grab secrets.masterbosh.hm-password ))
-    ssl: (( grab secrets.masterbosh.director.ssl ))
-
-  hm:
-    director_account:
-      user: hm
-      password: (( grab secrets.masterbosh.hm-password ))
-    resurrector_enabled: true
-
-  agent:
-    mbus: (( concat "https://mbus:" secrets.masterbosh.mbus-password "@" jobs.bosh.networks.private.static_ips[0] ":6868" ))
-
-  ntp:
-    - time.nist.gov
-
+    ntp:
+      - time.nist.gov
