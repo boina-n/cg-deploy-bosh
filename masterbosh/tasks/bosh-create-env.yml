@@ -15,5 +15,8 @@ inputs:
 - name: bosh-release
 - name: bosh-aws-cpi-release
 
+outputs:
+- name: updated-bosh-state
+
 run:
   path: deploy-bosh/masterbosh/tasks/bosh-create-env.sh

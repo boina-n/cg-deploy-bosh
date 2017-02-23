@@ -33,7 +33,7 @@ resource_pools:
     url: (( grab $STEMCELL_URL ))
     sha1: (( grab $STEMCELL_SHA1 ))
   cloud_properties:
-    instance_type: m3.large
+    instance_type: m4.large
     ephemeral_disk:
       size: 25_000
       type: gp2

@@ -58,3 +58,5 @@ spruce json secrets-decrypted/*.yml | jq -r .secrets.masterbosh.ssh.private_key 
 set -x
 bosh-cli create-env --state bosh-state/*.json deployment-manifest.yml
 
+cp bosh-state/*.json updated-bosh-state
+
