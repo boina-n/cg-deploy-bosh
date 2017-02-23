@@ -57,7 +57,7 @@ networks:
     - (( grab $STATIC_ADDRESS ))
     gateway: (( grab terraform_outputs.private_subnet_az1_gateway ))
     dns:
-      - (( grab $AMAZON_DNS ))
+      - (( grab terraform_outputs.private_subnet_az1_dns ))
     cloud_properties:
       subnet: (( grab terraform_outputs.private_subnet_az1 ))
 
@@ -99,7 +99,7 @@ properties:
   dns:
     address: (( grab jobs.bosh.networks.private.static_ips[0] ))
     db: *bosh_db
-    recursor: (( grab $AMAZON_DNS ))
+    recursor: (( grab terraform_outputs.private_subnet_az1_dns ))
     domain_name: masterbosh
 
   registry:
