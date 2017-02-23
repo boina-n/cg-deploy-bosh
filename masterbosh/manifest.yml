@@ -12,6 +12,7 @@ cloud_provider:
 
   properties:
     aws:
+      region: (( grab terraform_outputs.vpc_region ))
       credentials_source: env_or_profile
       default_key_name: (( grab secrets.masterbosh.ssh.keypair_name ))
       default_security_groups:
