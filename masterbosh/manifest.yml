@@ -8,7 +8,7 @@ cloud_provider:
     port: 22
     user: vcap
     private_key: ./ssh.key
-  mbus: (( grab properties.agent.mbus ))
+  mbus: (( grab jobs.bosh.properties.agent.mbus ))
 
   properties:
     aws:
@@ -20,8 +20,8 @@ cloud_provider:
     blobstore:
       provider: local
       path: /var/vcap/micro_bosh/data/cache}
-    agent: (( grab properties.agent ))
-    ntp: (( grab properties.ntp ))
+    agent: (( grab jobs.bosh.properties.agent ))
+    ntp: (( grab jobs.bosh.properties.ntp ))
 
 releases:
 - name: bosh
