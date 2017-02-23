@@ -13,6 +13,9 @@ cloud_provider:
   properties:
     aws:
       credentials_source: env_or_profile
+      default_key_name: (( grab secrets.masterbosh.ssh.keypair_name ))
+      default_security_groups:
+      - (( grab terraform_outputs.bosh_security_group ))
     blobstore:
       provider: local
       path: /var/vcap/micro_bosh/data/cache}
@@ -152,12 +155,6 @@ properties:
       user: hm
       password: (( grab secrets.masterbosh.hm-password ))
     resurrector_enabled: true
-
-  aws:
-    credentials_source: env_or_profile
-    default_key_name: (( grab secrets.masterbosh.ssh.keypair_name ))
-    default_security_groups:
-    - (( grab terraform_outputs.bosh_security_group ))
 
   agent:
     mbus: (( concat "https://mbus:" secrets.masterbosh.mbus-password "@" jobs.bosh.networks.private.static_ips[0] ":6868" ))
