@@ -999,6 +999,8 @@ jobs:
   - aggregate:
     - get: bosh-config
     - get: ubuntu-stemcell
+      params:
+        tarball: false
     - get: master-bosh-root-cert
     - get: check-stemcells-timer
       trigger: true
