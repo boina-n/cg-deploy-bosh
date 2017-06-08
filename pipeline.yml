@@ -994,7 +994,41 @@ jobs:
       username: {{slack-username}}
       icon_url: {{slack-icon-url}}
 
+- name: check-stemcells-production
+  plan:
+  - aggregate:
+    - get: bosh-config
+    - get: ubuntu-stemcell
+    - get: master-bosh-root-cert
+    - get: check-stemcells-timer
+      trigger: true
+  - task: check-stemcells
+    file: bosh-config/check-stemcells.yml
+    params:
+      BOSH_CA_CERT: master-bosh-root-cert/master-bosh.crt
+      BOSH_ENVIRONMENT: {{productionbosh-target}}
+      BOSH_CLIENT: {{productionbosh-uaa-client}}
+      BOSH_CLIENT_SECRET: {{productionbosh-uaa-client-secret}}
+  - put: slack
+    params:
+      text_file: message/message.txt
+      text: "Outdated stemcell(s) on production bosh: $TEXT_FILE_CONTENT"
+      channel: {{slack-news-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+
 resources:
+- name: ubuntu-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-aws-xen-ubuntu-trusty-go_agent
+    force_regular: true
+
+- name: check-stemcells-timer
+  type: time
+  source:
+    interval: 24h
+
 - name: master-bosh-root-cert
   type: s3
   source:
